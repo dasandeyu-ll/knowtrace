@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 密钥（千万不要提交）
+.env
+
+# 知识库运行产物（可重建，不入库）
+backend/chunks.json
+backend/faiss.index
+backend/data.db
+backend/.models/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
