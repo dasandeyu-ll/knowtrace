@@ -19,6 +19,10 @@ EMBED_MODEL = os.getenv("EMBED_MODEL", "BAAI/bge-small-zh-v1.5")
 QUERY_INSTRUCTION = "为这个句子生成表示以用于检索相关文章："
 RRF_K = 60
 
+# 两段式 Top-K：每路召回要宽（宁滥勿缺，让两路互相补位），融合后要窄（省 token、减少干扰）
+RECALL_K = int(os.getenv("RETRIEVE_RECALL_K", "8"))
+FINAL_K = int(os.getenv("RETRIEVE_FINAL_K", "4"))
+
 
 def chunk_text(text: str, size: int = 800, overlap: int = 150) -> List[str]:
     out, i = [], 0
@@ -191,12 +195,13 @@ class VectorStore:
             out.append((self.chunks[int(i)], float(score)))
         return out
 
-    def search(self, query: str, k: int = 4) -> List[dict]:
+    def search(self, query: str, k: int = None) -> List[dict]:
         """RRF 融合两路召回：score = Σ 1/(RRF_K + rank)"""
         if not self.chunks:
             return []
-        vec_hits = self._vector_search(query, k=8)
-        kw_hits = keyword_search(self.chunks, query, k=8)
+        k = k or FINAL_K
+        vec_hits = self._vector_search(query, k=RECALL_K)
+        kw_hits = keyword_search(self.chunks, query, k=RECALL_K)
         if not vec_hits and not kw_hits:
             return []
         fused: Dict[int, float] = {}

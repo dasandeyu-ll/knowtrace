@@ -84,6 +84,8 @@ npm run dev
 | `CHAT_MODEL` | 对话模型。DeepSeek 场景推荐 `deepseek-chat`（性价比最高） | `deepseek-chat` |
 | `EMBED_MODEL` | 向量模型，见下方「为什么用本地 embedding」 | `BAAI/bge-small-zh-v1.5` |
 | `HF_ENDPOINT` | 模型下载源，国内建议保持镜像 | `https://hf-mirror.com` |
+| `RETRIEVE_RECALL_K` | 每路召回的候选数，调大提升召回率 | `8` |
+| `RETRIEVE_FINAL_K` | RRF 融合后喂给 LLM 的段数，调大答案更全但更贵 | `4` |
 | `LANGSMITH_TRACING` | 设为 `true` 并填 `LANGSMITH_API_KEY` 可上报调用链 | `false` |
 
 ---

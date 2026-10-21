@@ -23,7 +23,7 @@ def init_db():
 init_db()
 
 # ---------- 知识库：混合检索（FAISS 向量 + 关键词），见 vector_store.py ----------
-from vector_store import VectorStore, chunk_text, keyword_search, tokenize
+from vector_store import VectorStore, chunk_text, keyword_search, tokenize, FINAL_K, RECALL_K
 
 CHUNKS_FILE = os.path.join(os.path.dirname(__file__), "chunks.json")
 FAISS_FILE = os.path.join(os.path.dirname(__file__), "faiss.index")
@@ -52,8 +52,8 @@ def autoload_seed():
 
 autoload_seed()
 
-def retrieve(query: str, k: int = 4):
-    return store.search(query, k=k)
+def retrieve(query: str, k: int = None):
+    return store.search(query, k=k or FINAL_K)
 
 class ChatReq(BaseModel):
     session_id: str = "default"
@@ -86,12 +86,14 @@ def kb_status():
 @app.get("/api/kb/debug")
 def kb_debug(q: str = "一线城市住宿上限"):
     """诊断：索引模式、向量维度、两路召回与融合结果"""
-    vec = store._vector_search(q, k=4)
-    kw = keyword_search(store.chunks, q, k=4)
+    vec = store._vector_search(q, k=RECALL_K)
+    kw = keyword_search(store.chunks, q, k=RECALL_K)
     hits = retrieve(q)
     return {
         "retrieval_mode": store.mode,
         "vector_dim": store._dim or None,
+        "recall_k": RECALL_K,
+        "final_k": FINAL_K,
         "chunk_count": len(store.chunks),
         "docs": sorted(set(c["source"] for c in store.chunks)),
         "query_tokens": tokenize(q),
